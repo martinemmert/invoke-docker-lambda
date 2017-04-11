@@ -39,7 +39,7 @@ if (fs.existsSync(path.join(process.cwd(), ".env"))) {
   options.env = `${envPath}/.env`;
   options.dockerArgs.push("--env-file", options.env);
 } else {
-  process.stdout.write(logSymbols.warning + " .env couldn't be found in the current directory.\n");
+  process.stderr.write(logSymbols.warning + " .env couldn't be found in the current directory.\n");
 }
 
 // check if a .event_mock.js is available
@@ -47,7 +47,7 @@ if (fs.existsSync(path.join(process.cwd(), ".event_mock.js"))) {
   let eventData = require(path.join(process.cwd(), ".event_mock.js"));
   options.event = eventData;
 } else {
-  process.stdout.write(logSymbols.warning + " .event_mock.js couldn't be found in the current directory.\n");
+  process.stderr.write(logSymbols.warning + " .event_mock.js couldn't be found in the current directory.\n");
 }
 
 // set the taskdirectory if available
@@ -56,7 +56,7 @@ if (fs.existsSync(path.join(process.cwd(), "build"))) {
   options.taskDir = path.join(process.cwd(), "lambda_test");
   shell.cp("-R", path.join(process.cwd(), "build"), options.taskDir);
 } else {
-  process.stdout.write(logSymbols.error + " Missing build directory with the compiled lambda function\n");
+  process.stderr.write(logSymbols.error + " Missing build directory with the compiled lambda function\n");
   shell.exit(1);
 }
 
