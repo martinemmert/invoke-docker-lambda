@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+
+const path = require("path");
+const fs = require("fs");
+const util = require("util");
+const logSymbols = require("log-symbols");
+const dockerLambda = require("docker-lambda");
+const pkg = require(path.join(process.cwd(), "package.json"));
+const shell = require("shelljs");
+
+const options = {
+  dockerImage: "lambci/lambda:nodejs6.10",
+  event: {},
+  addEnvVars: true,
+  dockerArgs: [],
+  returnSpawnResult: true
+};
+
+// check if docker is installed
+if (!shell.which("docker")) {
+  process.stderr.write(logSymbols.error + " This Script requires Docker\n");
+  shell.exit(1);
+}
+
+// check if the docker daemon is running
+let dockerInfo = shell.exec('docker info', {
+  silent: true
+});
+
+if (dockerInfo.code == 1) {
+  process.stderr.write(logSymbols.error + " " + dockerInfo.stderr);
+  process.stderr.write(logSymbols.info + " " + "This Script requires Docker to run\n");
+  shell.exit(1);
+};
+
+// check if a .env is available
+if (fs.existsSync(path.join(process.cwd(), ".env"))) {
+  let envPath = path.dirname(path.join(process.cwd(), ".env"));
+  options.env = `${envPath}/.env`;
+  options.dockerArgs.push("--env-file", options.env);
+} else {
+  process.stdout.write(logSymbols.warning + " .env couldn't be found in the current directory.\n");
+}
+
+// check if a .event_mock.js is available
+if (fs.existsSync(path.join(process.cwd(), ".event_mock.js"))) {
+  let eventData = require(path.join(process.cwd(), ".event_mock.js"));
+  options.event = eventData;
+} else {
+  process.stdout.write(logSymbols.warning + " .event_mock.js couldn't be found in the current directory.\n");
+}
+
+// set the taskdirectory if available
+// otherwise quit
+if (fs.existsSync(path.join(process.cwd(), "build"))) {
+  options.taskDir = path.join(process.cwd(), "lambda_test");
+  shell.cp("-R", path.join(process.cwd(), "build"), options.taskDir);
+} else {
+  process.stdout.write(logSymbols.error + " Missing build directory with the compiled lambda function\n");
+  shell.exit(1);
+}
+
+// duplicate & mount the node_modules directory
+if (pkg.dependencies) {
+  shell.cp("-R", path.join(process.cwd(), "node_modules"), path.join(options.taskDir, "node_modules"));
+}
+
+try {
+  let result = dockerLambda(options);
+
+  let stdout = result.stdout;
+  let stderr = result.stderr;
+
+  stdout = stdout.split('\n')
+
+  if (result.status === 0) {
+    stdout = JSON.parse(stdout[stdout.length - 1]);
+  } else {
+    stdout = stdout[stdout.length - 1];
+  }
+
+  process.stdout.write(stdout);
+  process.stderr.write(stderr);
+  shell.rm("-fR", options.taskDir);
+  shell.exit(result.status);
+} catch (err) {
+  console.error(err);
+  shell.rm("-fR", options.taskDir);
+  shell.exit(1);
+}

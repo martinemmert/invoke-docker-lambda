@@ -1,0 +1,26 @@
+{
+  "name": "invoke-docker-lambda",
+  "version": "0.1.0",
+  "description": "invoke a lambda function with mocked event and environment data locally inside a lambci/docker-lambda container",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.js",
+  "bin": {
+    "run-local-lambda": "./bin/run-local-lambda"
+  },
+  "keywords": [
+    "lambda",
+    "aws",
+    "docker",
+    "test"
+  ],
+  "author": "Martin Emmert <martin@martinemmert.de>",
+  "license": "MIT",
+  "dependencies": {
+    "colorprint": "^4.1.0",
+    "docker-lambda": "^0.12.2",
+    "log-symbols": "^1.0.2",
+    "shelljs": "^0.7.7"
+  }
+}
