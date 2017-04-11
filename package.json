@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "bin": {
-    "run-local-lambda": "./bin/run-local-lambda"
+    "invoke-docker-lambda": "./bin/invoke-docker-lambda"
   },
   "keywords": [
     "lambda",
