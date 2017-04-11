@@ -1,6 +1,6 @@
 {
   "name": "invoke-docker-lambda",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "invoke a lambda function with mocked event and environment data locally inside a lambci/docker-lambda container",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
